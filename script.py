@@ -1,96 +1,51 @@
 # Created by Helga on 28.02.2021
-import os
-import shutil
+from command import Command
+
+import sys
+from features import get_list, start, create_file, create_folder, delete, write_to_file, read_file, rename, copy, move, \
+    help, info, change_root, change_dir_up, change_dir_down, get_dir
 import pathlib
-from datetime import datetime
-
-
-def create_folder(name):
-    try:
-        os.mkdir(name)
-    except FileExistsError:
-        print("Такая папка уже существует")
-
-
-def create_file(name, text=None):
-    with open(name, 'w', encoding='utf-8') as file:
-        if text:
-            file.write(text)
-
-
-def delete(name):
-    if os.path.isdir(name):
-        os.rmdir(name)
-    else:
-        os.remove(name)
-
-
-def write_to_file(name, text):
-    with open(name, 'w', encoding='utf-8') as file:
-            file.write(text)
-
-
-def read_file(name):
-    with open(name, "r") as f:
-        for line in f.readlines():
-            print(line)
-
-
-def rename(name, new_name):
-    try:
-        os.rename(name, new_name)
-    except FileExistsError:
-        if os.path.isdir(name):
-            print("Такая папка уже существует")
-        else:
-            print("Такой файл уже существует")
-
-
-def copy(name, new_name):
-    if os.path.isdir(name):
-        try:
-            shutil.copytree(name, new_name)
-        except FileExistsError:
-            "Такая папка уже существует"
-    else:
-        shutil.copy(name, new_name)
-
-
-def get_list(name, param=0, param2=0):  # сортировка
-    listdir = os.listdir(name)
-    files = []
-    for file in listdir:
-        files.append([file, os.path.getsize(file), os.path.getctime(file), os.path.getmtime(file)])
-    list_file = files[:]  # копия списока, чтобы не испортить изначальный набор данных
-    list_file.sort(key=lambda item: item[param], reverse=True if param2 == 1 else False)
-    file_pr = ''
-    title = f' {"Название файла":30} | {"Размер":8} | {"Дата создания":26} | {"Дата модификации":26}'
-    line = 25 * "_ _ "
-
-    for name, size, time_start, time_modification in list_file:
-        file_pr += ''.join(
-            f' {name:30} | {size:8} | {datetime.fromtimestamp(time_start)} | {datetime.fromtimestamp(time_modification)} \n')
-    print(title + "\n" + line + "\n" + file_pr)
+import sys
+info('Скрипт начал работу')
+start()
 
 
 
-def help():
-    pass
+cfile = Command(create_file)
+cfolder = Command(create_folder)
+delete = Command(delete)
+wfile = Command(write_to_file)
+rfile = Command(read_file)
+renamef = Command(rename)
+cp = Command(copy)
+mv = Command(move)
+hp = Command(help)
+list = Command(get_list)
+chroot = Command(change_root)
+chdirup = Command(change_dir_up)
+chdirdown = Command(change_dir_down)
 
+MAP = {
+    'create_file': cfile,
+    'create_folder': cfolder,
+    'delete': delete,
+    'write_to_file': wfile,
+    'read_file': rfile,
+    'rename': renamef,
+    'copy': cp,
+    'move': mv,
+    'help': hp,
+    'change_root': chroot,
+    'change_dir_up': chdirup,
+    'change_dir_down': chdirdown,
+    'list': list,
+}
 
-def info(text):
-    time = datetime.now()
-    print(f'{text} в {time}')
+argv = sys.argv
+command = argv[1]
+if len(command) > 0:
+    if command in MAP:
+        MAP[command].execute(argv[2:])
 
-
-def change_root(way_to_root):
-    with open('setting.txt', 'w', encoding='utf-8') as file:
-        file.write(way_to_root)
-
-
-def start():
-    if os.path.getsize("setting.txt") == 0:
-        with open("setting.txt", 'w', encoding='utf-8') as file:
-            file.write(r'C:\Users\otete\PycharmProjects\ IT Python\Tasks 4 semester\Practice\file-manager\root')
-
-
+print(get_dir())
+info('Скрипт закончил работу')
