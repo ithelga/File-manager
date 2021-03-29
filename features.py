@@ -39,26 +39,38 @@ def delete(name, text1=None, text2=None):
     name = str(get_dir().joinpath(pathlib.Path(name)))
     if os.path.exists(name):
         if os.path.isdir(name):
-            os.rmdir(name)
-            print(text1 + "Папка успешно удалена")
+            shutil.rmtree(name, ignore_errors=True)
+            if text1 == None:
+                print("Папка успешно удалена")
+            else:
+                print(str(text1) + " Папка успешно удалена")
         else:
             os.remove(name)
-            print(text2 + "Файл успешно удален")
+            if text2 == None:
+                print("Файл успешно удален")
+            else:
+                print(str(text2) + " Файл успешно удален")
     else:
         print("Не удается найти заданный путь")
 
 
 def write_to_file(name, text):
     name = str((get_dir().joinpath(pathlib.Path(name))))
-    with open(name, 'w', encoding='utf-8') as file:
-        file.write(text)
+    try:
+        with open(name, 'w', encoding='utf-8') as file:
+            file.write(text)
+    except FileNotFoundError:
+        print("Такой файл не существует")
 
 
 def read_file(name):
     name = str((get_dir().joinpath(pathlib.Path(name))))
-    with open(name, "r") as f:
-        for line in f.readlines():
-            print(line)
+    try:
+        with open(name, "r") as f:
+            for line in f.readlines():
+                print(line)
+    except FileNotFoundError:
+        print("Такой файл не существует")
 
 
 def rename(name, new_name):
@@ -73,6 +85,10 @@ def rename(name, new_name):
             print("Такая папка уже существует")
         else:
             print("Такой файл уже существует")
+
+    except FileNotFoundError:
+        print("Неверно задан путь")
+
     else:
         if name_is_dir:
             print("Папка успешно переименована")
@@ -100,9 +116,9 @@ def copy(name, new_name, text1="Папка успешно скопирована
         name = str(dir.joinpath(pathlib.Path(name)))
 
     if newName_exists == False:
-        new_name = str(root.joinpath(pathlib.Path(new_name)))
+        new_name = root.joinpath(pathlib.Path(new_name))
     else:
-        new_name = str(dir.joinpath(pathlib.Path(new_name)))
+        new_name = dir.joinpath(pathlib.Path(new_name))
 
     if os.path.exists(name) and os.path.exists(new_name):
         if os.path.isdir(name):
@@ -125,7 +141,7 @@ def move(name, new_name):
 
 
 def get_list(name=None, param=0, param2=0):
-    if 3 > param < 0 or 1 > param2 < 0:
+    if 3 > int(param) < 0 or 1 > int(param2) < 0:
         print("Переданы неверные параметры")
     else:
         dir = get_dir()
@@ -139,7 +155,7 @@ def get_list(name=None, param=0, param2=0):
             filePath = name.joinpath(pathlib.Path(file))
             files.append([file, os.path.getsize(filePath), os.path.getctime(filePath), os.path.getmtime(filePath)])
         list_file = files[:]
-        list_file.sort(key=lambda item: item[int(param)], reverse=True if param2 == 1 else False)
+        list_file.sort(key=lambda item: item[int(param)], reverse=True if int(param2) == 1 else False)
         file_pr = ''
         title = f' {"Название файла":30} | {"Размер":8} | {"Дата создания":26} | {"Дата модификации":26}'
         line = 25 * "----"
@@ -151,7 +167,32 @@ def get_list(name=None, param=0, param2=0):
 
 
 def help():
-    pass
+    print(
+        f' Расшифровка: \n'
+        f' Обяз! - обязательно \n'
+        f' Опц - опционально \n'
+        f' \n В файле setting.txt хранится root\n'
+        f' \n В файле log.txt хранится информация о скрипте\n'
+
+        f' ОСНОВНЫЕ ВОЗМОЖНОСТИ: \n'
+        f' create_file - создать файл; 1 арг(обяз!) - имя файла, 2 арг - текс для записи \n'
+        f' create_folder - создать директорию; 1 арг(обяз!) - имя директории, \n'
+        f' delete - удалить файл или директорию; 1 арг(обяз!) - имя файла или директории для удаления \n'
+
+        f' write_to_file - записать в файл; 1 арг(обяз!) - имя файла или путь к файлу, в который нужно записать, 2 арг(обяз!) - текст сообщения \n'
+        f' read_file - прочитать файл; 1 арг(обяз!) - имя файла или путь к файлу, который нужно прочитать \n'
+        f' rename - переименовать файл или директорию; 1 арг(обяз!) - имя файла или директории, которые нужно переименовать, 2 арг(обяз!) - имя, на которое заменить \n'
+        f' copy - скопировать файл или директорию; 1 арг(обяз!) - имя файла или директории, которые нужно скопировать, 2 арг(обяз!) - имя директории/путь, куда скопировать \n'
+        f' move - переместить файл или директорию; 1 арг(обяз!) - имя файла или директории, которые нужно переместить, 2 арг(обяз!) - имя директории/путь, куда переместить \n'
+
+        f' help - помощь; \n'
+        f' change_root - сменить корневую директорию; 1 арг(обяз!) - указать абсолютный путь до новой корневой директории \n'
+        f' change_dir_up - перейти в родительскую директорию; без аргументов \n'
+        f' change_dir_down - перейти в дочернюю директорию; 1 арг(обяз!) - имя папки в текущей директории или путь (абсолютный от корневой или относительный от текуще директории) \n'
+        f' list - получить список файлов в каталоге; 1 арг(опц) - имя каталога в текущей директории, если не указать, то список файлов в текущей директории , '
+        f' 2 арг (опц) - параметр для сортировки, т.е по какому полю сортировать: 0 - название файла, 1 - Размер, 2 - Дата создания, 3 - Дата Модификации '
+        f' 3 арг (опц) - параметр для сортировки: 0 - возрастание, 1 - убывание\n'
+    )
 
 
 def info(text):
@@ -181,18 +222,19 @@ def change_dir_down(way):
 
 def change_dir_up():
     dir = get_dir()
-    new_dir = str(dir.parents[0])
-    if new_dir == str(get_root()):
+    root = get_root()
+    if dir == root:
         print("Вы достигли корневой директории")
     else:
+        new_dir = dir.parents[0]
         with open("dir.txt", 'w', encoding='utf-8') as file:
-            file.write(new_dir)
+            file.write(str(new_dir))
 
 
 def start():
     if os.path.exists("setting.txt") == False or os.path.getsize("setting.txt") == 0:
+        way = pathlib.Path(r'C:\Users\otete\PycharmProjects\ IT Python')
         with open("setting.txt", 'w', encoding='utf-8') as file:
-            file.write(r'C:\Users\otete\PycharmProjects\ IT Python\Tasks 4 semester\Practice\file-manager')
-    if os.path.exists("dir.txt") == False or os.path.getsize("dir.txt") == 0:
+            file.write(str(way))
         with open("dir.txt", 'w', encoding='utf-8') as file:
-            file.write(r'C:\Users\otete\PycharmProjects\ IT Python\Tasks 4 semester\Practice\file-manager')
+            file.write(str(way))

@@ -46,6 +46,10 @@ command = argv[1]
 if len(command) > 0:
     if command in MAP:
         MAP[command].execute(argv[2:])
+    else:
+        print("Введена неверня команда. Введите help, чтобы изучить функционал")
 
 print(get_dir())
 info('Скрипт закончил работу')
+
+

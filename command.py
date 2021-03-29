@@ -11,7 +11,7 @@ class Command(object):
     def execute(self, argv):
         check = CheckArgv(argv)
         if check.is_rigth(self.function):
-            return self.function(*argv)
+           return self.function(*argv)
         else:
             print("Неверные аргументы")
             return None
